@@ -69,6 +69,10 @@ public class SubscriptionService {
 
         User user = userRepository.findById(userId).get();
 
+        if (user.getSubscription().getSubscriptionType().toString().equalsIgnoreCase(SubscriptionType.ELITE.toString())){
+            throw new Exception("Already the best Subscription");
+        }
+
         Date subscDate = user.getSubscription().getStartSubscriptionDate();
 //        int d1 = subscDate.getDay();
         Date todayDate = new Date();
