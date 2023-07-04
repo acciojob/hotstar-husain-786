@@ -67,37 +67,27 @@ public class SubscriptionService {
         //In all other cases just try to upgrade the subscription and tell the difference of price that user has to pay
         //update the subscription in the repository
 
-        User user = userRepository.findById(userId).get();
-
-        if (user.getSubscription().getSubscriptionType().toString().equalsIgnoreCase(SubscriptionType.ELITE.toString())){
+        User user=userRepository.findById(userId).get();
+        if(user.getSubscription().getSubscriptionType().toString().equals("ELITE")){
             throw new Exception("Already the best Subscription");
         }
 
-        Date subscDate = user.getSubscription().getStartSubscriptionDate();
-//        int d1 = subscDate.getDay();
-        Date todayDate = new Date();
-//        int d2 = new Date().getDay();
-        int diff = Math.toIntExact(ChronoUnit.DAYS.between((Temporal) subscDate, (Temporal) todayDate));
+        Subscription subscription=user.getSubscription();
+        Integer previousFair=subscription.getTotalAmountPaid();
+        Integer currentFair;
+        if(subscription.getSubscriptionType().equals(SubscriptionType.BASIC)){
+            subscription.setSubscriptionType(SubscriptionType.PRO);
+            currentFair =previousFair+300+(50*subscription.getNoOfScreensSubscribed());
+        }else {
+            subscription.setSubscriptionType(SubscriptionType.ELITE);
+            currentFair=previousFair+200+(100*subscription.getNoOfScreensSubscribed());
+        }
 
-        int price = 0;
-        if (user.getSubscription().toString().equalsIgnoreCase(SubscriptionType.BASIC.toString())) price = 500;
-        else if (user.getSubscription().toString().equalsIgnoreCase(SubscriptionType.PRO.toString())) price = 800;
-        else if (user.getSubscription().toString().equalsIgnoreCase(SubscriptionType.ELITE.toString())) price = 1000;
-
-        Integer remainingPrice = diff*(price/30);
-
-        int dayRemainingForPro = remainingPrice/1000;
-        Integer amountToPay = (30-dayRemainingForPro)*1000;
-
-        Subscription subscription = user.getSubscription();
-        subscription.setSubscriptionType(SubscriptionType.ELITE);
-        subscription = subscriptionRepository.save(subscription);
-
+        subscription.setTotalAmountPaid(currentFair);
         user.setSubscription(subscription);
+        subscriptionRepository.save(subscription);
 
-        userRepository.save(user);
-
-        return amountToPay;
+        return currentFair-previousFair;
     }
 
     public Integer calculateTotalRevenueOfHotstar(){
