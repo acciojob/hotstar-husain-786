@@ -36,10 +36,10 @@ public class WebSeriesService {
         webSeries.setAgeLimit(webSeriesEntryDto.getAgeLimit());
         webSeries.setRating(webSeriesEntryDto.getRating());
         webSeries.setSubscriptionType(webSeriesEntryDto.getSubscriptionType());
+        webSeries.setProductionHouse(productionHouse);
         webSeries = webSeriesRepository.save(webSeries);
 
         productionHouse.getWebSeriesList().add(webSeries);
-        webSeries.setProductionHouse(productionHouse);
         productionHouse = productionHouseRepository.save(productionHouse);
 
         Double avg = 0d;
